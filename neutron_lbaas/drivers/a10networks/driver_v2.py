@@ -21,11 +21,13 @@ VERSION = "2.0.0"
 LOG = logging.getLogger(__name__)
 
 
+
+
 class ThunderDriver(driver_base.LoadBalancerBaseDriver):
 
-    def __init__(self, plugin):
+    def __init__(self, plugin, config=None):
         super(ThunderDriver, self).__init__(plugin)
-
+        self.config = config
         self.load_balancer = LoadBalancerManager(self)
         self.listener = ListenerManager(self)
         self.pool = PoolManager(self)
@@ -35,8 +37,12 @@ class ThunderDriver(driver_base.LoadBalancerBaseDriver):
         LOG.debug("A10Driver: v2 initializing, version=%s, lbaas_manager=%s",
                   VERSION, a10_neutron_lbaas.VERSION)
 
-        self.a10 = a10_neutron_lbaas.A10OpenstackLBV2(self)
+        self.a10 = a10_neutron_lbaas.A10OpenstackLBV2(self,self.config)
 
+class ThunderDriver_test(ThunderDriver):
+
+    def __init__(self, plugin):
+        super(ThunderDriver_test, self).__init__(plugin, "conf_test")
 
 class LoadBalancerManager(driver_base.BaseLoadBalancerManager):
 
