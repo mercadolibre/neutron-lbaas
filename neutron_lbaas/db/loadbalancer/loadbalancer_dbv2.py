@@ -149,10 +149,16 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
 
     def assert_modification_allowed(self, obj):
         status = getattr(obj, 'provisioning_status', None)
-        if status in [constants.PENDING_DELETE, constants.PENDING_UPDATE,
-                      constants.PENDING_CREATE]:
-            id = getattr(obj, 'id', None)
-            raise loadbalancerv2.StateInvalid(id=id, state=status)
+        if obj.__class__.__name__ == "LoadBalancer":
+            if status in [constants.PENDING_DELETE, constants.PENDING_CREATE]:
+                id = getattr(obj, 'id', None)
+                raise loadbalancerv2.StateInvalid(id=id, state=status)
+            elif status in constants.PENDING_UPDATE:
+                LOG.warning("[JONAS] Bypassing PENDING_UPDATE state on LoadBalancer since concurrent updates are supported by A10")
+        else:
+            if status in [constants.PENDING_DELETE, constants.PENDING_UPDATE, constants.PENDING_CREATE]:
+                id = getattr(obj, 'id', None)
+                raise loadbalancerv2.StateInvalid(id=id, state=status)
 
     def test_and_set_status(self, context, model, id, status):
         with context.session.begin(subtransactions=True):
