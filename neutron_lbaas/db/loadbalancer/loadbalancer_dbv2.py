@@ -604,6 +604,11 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
         member_db = self._get_resource(context, models.MemberV2, id)
         return data_models.Member.from_sqlalchemy_model(member_db)
 
+    def get_pool_members_by_pabloncio(self, context, filters=None):
+        filters = filters or {}
+        return self._get_resources(context, models.MemberV2,
+                                         filters=filters)
+
     def delete_member(self, context, id):
         with context.session.begin(subtransactions=True):
             member_db = self._get_resource(context, models.MemberV2, id)

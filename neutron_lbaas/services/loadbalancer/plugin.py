@@ -970,13 +970,37 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
                                     driver.member.delete,
                                     db_member)
 
+#    def get_pool_members(self, context, pool_id, filters=None, fields=None):
+#        self._check_pool_exists(context, pool_id)
+#        if not filters:
+#            filters = {}
+#        filters['pool_id'] = [pool_id]
+#        return [mem.to_api_dict() for mem in self.db.get_pool_members(
+#            context, filters=filters)]
+
+    ## cambio para bajar tiempòs de respuesta 
     def get_pool_members(self, context, pool_id, filters=None, fields=None):
         self._check_pool_exists(context, pool_id)
         if not filters:
             filters = {}
         filters['pool_id'] = [pool_id]
-        return [mem.to_api_dict() for mem in self.db.get_pool_members(
-            context, filters=filters)]
+        #a = [mem.to_api_dict() for mem in self.db.get_pool_members(context, filters=filters)]
+        a=[]
+        for mem_p in self.db.get_pool_members_by_pabloncio(context, filters=filters):
+           mem = {}
+           mem['name'] = mem_p.name
+           mem['weight'] = mem_p.weight
+           mem['admin_state_up'] = mem_p.admin_state_up
+           mem['subnet_id'] = mem_p.subnet_id
+           mem['tenant_id'] = mem_p.tenant_id
+           mem['pool_id'] = mem_p.pool_id
+           mem['address'] = mem_p.address
+           mem['protocol_port'] = mem_p.protocol_port
+           mem['id'] = mem_p.id
+           a.append(mem)
+        return a
+
+
 
     def get_pool_member(self, context, id, pool_id, fields=None):
         self._check_pool_exists(context, pool_id)
